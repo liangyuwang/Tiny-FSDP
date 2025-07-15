@@ -9,10 +9,19 @@ from tqdm.auto import tqdm
 import torch
 import torch.distributed as dist
 from collections import OrderedDict
+import argparse
 
 from example.model import GPTConfigs, GPT2Model
 from tiny_fsdp.core import Zero3SGD, Zero3AdamW, Zero3
 from tiny_fsdp.core import zero3_partition_tensors
+
+# Parse arguments
+parser = argparse.ArgumentParser(description='ZeRO-3 Training')
+parser.add_argument('--model', choices=['gpt2', 'gpt2_medium', 'gpt2_large', 'gpt2_xl'], default='gpt2', help='Model size')
+parser.add_argument('--lr', type=float, default=1e-5, help='Learning rate')
+parser.add_argument('--steps', type=int, default=100, help='Training steps')
+parser.add_argument('--weight_decay', type=float, default=1e-1, help='Weight decay')
+args = parser.parse_args()
 
 # init distributed
 rank = int(os.getenv('LOCAL_RANK', '0'))
@@ -21,7 +30,7 @@ world_size = int(os.getenv('WORLD_SIZE', '1'))
 dist.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
 torch.cuda.set_device(rank)
 
-config = GPTConfigs.gpt2
+config = getattr(GPTConfigs, args.model)
 ranks_map = [f"cuda:{i}" for i in range(world_size)]
 with torch.device('meta'):
     model = GPT2Model(config)
@@ -34,9 +43,9 @@ input = torch.randint(0, config.vocab_size, (1, config.block_size)).to(rank)
 target = torch.randint(0, config.vocab_size, (1, config.block_size)).to(rank)
 model = GPT2Model(config)  # Create model on CPU first
 model = Zero3(model, parts)  # Then wrap with Zero3
-optimizer = Zero3AdamW(model.module.named_parameters(), lr=1e-5, weight_decay=1e-1, param_part_table=parts, ranks_map=ranks_map)
+optimizer = Zero3AdamW(model.module.named_parameters(), lr=args.lr, weight_decay=args.weight_decay, param_part_table=parts, ranks_map=ranks_map)
 
-for i in tqdm(range(100), disable=rank!=0):
+for i in tqdm(range(args.steps), disable=rank!=0):
     model.require_backward_grad_sync = True # set to True when need grad all reduce
     _, loss = model(input, target)
     loss.backward()

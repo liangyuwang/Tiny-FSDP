@@ -58,6 +58,17 @@ cd Tiny-FSDP
 
 ## 🚀 Quick Start
 
+### Command Line Arguments
+
+All training scripts support the following parameters:
+
+| Parameter | Options | Default | Description |
+|-----------|---------|---------|-------------|
+| `--model` | `gpt2`, `gpt2_medium`, `gpt2_large`, `gpt2_xl` | `gpt2` | Model size |
+| `--lr` | float | `1e-5` | Learning rate |
+| `--steps` | int | `100` | Number of training steps |
+| `--weight_decay` | float | `1e-1` | Weight decay for optimizer |
+
 ### Single GPU Training
 ```python
 import torch
@@ -78,16 +89,27 @@ for batch in dataloader:
 ### Distributed Training with DDP
 ```bash
 torchrun --nproc_per_node=2 example/ddp/train.py
+# With custom parameters
+torchrun --nproc_per_node=2 example/ddp/train.py --model gpt2_medium --lr 2e-5 --steps 200
 ```
 
 ### Distributed Training with ZeRO-3
 ```bash
 torchrun --nproc_per_node=2 example/zero3/train.py
+# With custom parameters
+torchrun --nproc_per_node=2 example/zero3/train.py --model gpt2_large --lr 1e-4 --steps 50
 ```
 
 ### Distributed Training with FSDP
 ```bash
 torchrun --nproc_per_node=2 example/fsdp/train.py
+# With custom parameters
+torchrun --nproc_per_node=2 example/fsdp/train.py --model gpt2_xl --lr 5e-6 --steps 500
+```
+
+### Single Device Training
+```bash
+python example/single_device/train.py --model gpt2 --lr 1e-4 --steps 100
 ```
 
 ## 📚 Usage Examples
