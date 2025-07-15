@@ -291,20 +291,3 @@ This implementation is designed for learning. Key educational features:
 ## 📄 License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- PyTorch team for the distributed training primitives
-- Microsoft DeepSpeed for ZeRO innovation
-- Meta for FSDP contributions to the community
-- The broader open-source ML community
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-repo/discussions)
-- **Documentation**: See `README_FSDP.md` for detailed FSDP implementation notes
-
----
-
-*Built with ❤️ for the distributed training community*
